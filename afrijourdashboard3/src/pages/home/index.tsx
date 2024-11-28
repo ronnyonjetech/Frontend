@@ -15,16 +15,16 @@ import Popup from '@/components/pop-up'
 
 export default function Home() {
   const [results, setResults] = useState(0)
-  const [searchType, setSearchType] = useState('abstract'); // State to track search type selection
+  const [searchType, setSearchType] = useState('abstract') // State to track search type selection
   const [searchQuery, setSearchQuery] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [journals, setJournals] = useState([])
   const pageSize = 10
   const [numberJournals, setNumberJournals] = useState(0)
-  const [showPopup, setShowPopup] = useState(true);
+  const [showPopup, setShowPopup] = useState(true)
 
-  const handlePopupClose = () => setShowPopup(false);
+  const handlePopupClose = () => setShowPopup(false)
 
   const popupMessage = `Thank you for visiting our site. While we are constantly updating our data and features, please note that the information and calculations provided are based on our latest indexed publications and may change as more data is added to the platform.
 
@@ -32,7 +32,7 @@ export default function Home() {
 
   Rest assured, our platform still offers valuable insights into the individuals and entities featured. We are committed to adhering to industry standards to resolve these limitations in both the short and long term.
 
-  Thank you for your understanding and support as we work to enhance your experience on African Journal Visibility.`;
+  Thank you for your understanding and support as we work to enhance your experience on African Journal Visibility.`
 
   const [filters, setFilters] = useState({
     Present_on_ISSN: null,
@@ -45,10 +45,10 @@ export default function Home() {
     open_access_journal: null,
   })
 
-  const baseUrl = "https://aphrc.site/journal_api/journals/search/"
+  const baseUrl = 'https://aphrc.site/journal_api/journals/search/'
 
   const handleCheckboxChange = (name: string, checked: boolean) => {
-    setFilters(prevFilters => ({
+    setFilters((prevFilters) => ({
       ...prevFilters,
       [name]: checked,
     }))
@@ -58,9 +58,9 @@ export default function Home() {
     const queryParams = Object.entries(filters)
       .filter(([key, value]) => value !== null) // Only include non-null values
       .map(([key, value]) => `${key}=${value}`)
-      .join("&")
+      .join('&')
 
-    const query = searchQuery ? `&query=${encodeURIComponent(searchQuery)}` : ""
+    const query = searchQuery ? `&query=${encodeURIComponent(searchQuery)}` : ''
     const page = `&page=${currentPage}`
     const pageSizeParam = `&page_size=${pageSize}`
 
@@ -73,10 +73,10 @@ export default function Home() {
         // Generate dynamic URL for search filters
         const url = generateUrl()
         const response = await fetch(url, {
-          method: "GET",
+          method: 'GET',
           headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
           },
         })
 
@@ -99,7 +99,7 @@ export default function Home() {
   }, [currentPage, searchQuery, filters])
 
   const handleSearch = () => {
-    console.log(`Searching by ${searchType}:`, searchQuery);
+    console.log(`Searching by ${searchType}:`, searchQuery)
     setCurrentPage(1) // Reset to first page when performing a new search
   }
 
@@ -118,51 +118,63 @@ export default function Home() {
   return (
     <Layout>
       {showPopup && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="relative bg-white rounded-lg shadow-lg w-full max-w-2xl p-6">
+        <div className='fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50'>
+          <div className='relative w-full max-w-2xl rounded-lg bg-white p-6 shadow-lg'>
             {/* Header with X Symbol and Title */}
-            <div className="flex justify-between items-center mb-6">
+            <div className='mb-6 flex items-center justify-between'>
               {/* Title */}
-              <h2 className="text-2xl font-bold text-blue-700">
+              <h2 className='text-2xl font-bold text-blue-700'>
                 Welcome to African Journal Visibility!
               </h2>
               {/* Close Button */}
               <button
-                className="text-yellow-500 hover:text-yellow-700 text-5xl font-bold"
+                className='text-5xl font-bold text-yellow-500 hover:text-yellow-700'
                 onClick={handlePopupClose}
-                aria-label="Close"
+                aria-label='Close'
               >
                 &times;
               </button>
             </div>
 
             {/* Warning Section */}
-            <div className="border-l-4 border-yellow-500 bg-yellow-100 p-4 rounded mb-6">
-              <h3 className="text-lg font-semibold text-yellow-800">
+            <div className='mb-6 rounded border-l-4 border-yellow-500 bg-yellow-100 p-4'>
+              <h3 className='text-lg font-semibold text-yellow-800'>
                 Important Notice
               </h3>
-              <p className="text-gray-700">
-                Some of the data on this platform may be <strong>AI-generated</strong>. While we strive for accuracy, discrepancies may exist. Always verify critical information before use.
+              <p className='text-gray-700'>
+                Some of the data on this platform may be{' '}
+                <strong>AI-generated</strong>. While we strive for accuracy,
+                discrepancies may exist. Always verify critical information
+                before use.
               </p>
             </div>
 
             {/* General Information */}
-            <div className="space-y-4 text-gray-800">
+            <div className='space-y-4 text-gray-800'>
               <p>
-                Thank you for visiting our site. While we are constantly updating our data and features, the information and calculations provided are based on our latest indexed publications and may change as new data is added.
+                Thank you for visiting our site. While we are constantly
+                updating our data and features, the information and calculations
+                provided are based on our latest indexed publications and may
+                change as new data is added.
               </p>
               <p>
-                Our team is working diligently to address inconsistencies in names and aliases across data sources. Some author and institution information may be incomplete as we refine our database.
+                Our team is working diligently to address inconsistencies in
+                names and aliases across data sources. Some author and
+                institution information may be incomplete as we refine our
+                database.
               </p>
               <p>
-                Despite these limitations, our platform provides valuable insights into the individuals and entities featured. We adhere to industry standards and are committed to improving your experience.
+                Despite these limitations, our platform provides valuable
+                insights into the individuals and entities featured. We adhere
+                to industry standards and are committed to improving your
+                experience.
               </p>
             </div>
 
             {/* Action Button */}
-            <div className="text-center mt-6">
+            <div className='mt-6 text-center'>
               <Button
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                className='rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700'
                 onClick={handlePopupClose}
               >
                 Got It
@@ -185,16 +197,16 @@ export default function Home() {
         <div className='flex min-h-screen flex-col '>
           <header className='flex items-center justify-between bg-primary text-primary-foreground'></header>
           <main className='flex-grow'>
-            <section className='bg-primary px-4 py-20 text-center text-white'>
+            {/* <section className='bg-primary px-4 py-20 text-center text-white'>
               <h1 className='mb-4 text-4xl font-bold'>
                 Browse our journals that are just right for you
               </h1>
               <p className='mb-8'>
-                Choose from over {numberJournals} journals and learning paths, with dozens
-                added every week. Top it off with courses that round out your
-                skills and enrich your day-to-day.
+                Choose from over {numberJournals} journals and learning paths,
+                with dozens added every week. Top it off with courses that round
+                out your skills and enrich your day-to-day.
               </p>
-              {/* Search Type Selector */}
+              
               <div className='mb-4 flex items-center justify-center space-x-4 '>
                 <label className='flex items-center'>
                   <input
@@ -222,13 +234,15 @@ export default function Home() {
               </div>
 
               <div className='relative mx-auto max-w-2xl'>
+                
                 <Input
-                  className='w-full rounded-full bg-white px-8 py-8'
+                  className='w-full rounded-full bg-white px-8 py-8 text-gray-500'
                   placeholder='Search Article'
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   type='text'
                 />
+
                 <Button
                   className='absolute right-5 top-3 rounded-full'
                   size='icon'
@@ -239,16 +253,89 @@ export default function Home() {
                   <span className='sr-only'>Search</span>
                 </Button>
               </div>
-            </section>
+            </section> */}
+
+
+            <section className='bg-primary px-4 py-20 text-center text-white'>
+  <h1 className='mb-4 text-4xl font-bold'>
+    Browse our journals that are just right for you
+  </h1>
+  <p className='mb-8'>
+    Choose from over {numberJournals} journals and learning paths, with dozens added every week. 
+    Top it off with courses that round out your skills and enrich your day-to-day.
+  </p>
+  {/* Search Type Selector */}
+  <div className='mb-4 flex items-center justify-center space-x-4'>
+    <label className='flex items-center'>
+      <input
+        type='radio'
+        name='searchType'
+        value='abstract'
+        checked={searchType === 'abstract'}
+        onChange={() => setSearchType('abstract')}
+        className='mr-2'
+      />
+      Search by abstract
+    </label>
+    <label className='flex items-center'>
+      <input
+        type='radio'
+        name='searchType'
+        value='keyword'
+        checked={searchType === 'keyword'}
+        onChange={() => setSearchType('keyword')}
+        className='mr-2'
+      />
+      Search by keywords, journal title, discipline, language, country...
+    </label>
+  </div>
+
+  <div className='relative mx-auto max-w-2xl'>
+    <Input
+      className='w-full rounded-full bg-white px-8 py-8 text-gray-500'
+      placeholder={
+        searchType === 'abstract' 
+          ? 'Search by abstract' 
+          : 'Search by keywords, title, or discipline'
+      }
+      value={searchQuery}
+      onChange={(e) => setSearchQuery(e.target.value)}
+      type='text'
+    />
+    <Button
+      className='absolute right-5 top-3 rounded-full'
+      size='icon'
+      variant={'ghost'}
+      onClick={handleSearch}
+    >
+      <Search className='h-8 w-8' />
+      <span className='sr-only'>Search</span>
+    </Button>
+  </div>
+</section>
+
+
+
+
             <section className='px-4 py-12'>
               <div className='mx-auto max-w-6xl'>
                 <div className='mb-8 flex items-center justify-between'>
                   <p>{results} results</p>
                   <div className='flex items-center space-x-2'>
-                    <Button variant='outline' size='icon' onClick={handlePreviousPage} disabled={currentPage === 1}>
+                    <Button
+                      variant='outline'
+                      size='icon'
+                      onClick={handlePreviousPage}
+                      disabled={currentPage === 1}
+                    >
                       <ChevronLeft className='h-4 w-4' />
                     </Button>
-                    <Button variant='outline' size='icon' onClick={handleNextPage} disabled={currentPage === totalPages}>
+                    <Button
+                      variant='outline'
+                      size='icon'
+                      onClick={handleNextPage}
+                      disabled={currentPage === totalPages}
+                    >
                       <ChevronRight className='h-4 w-4' />
                     </Button>
                   </div>
@@ -261,32 +348,44 @@ export default function Home() {
                           <CardContent className='pt-6'>
                             <h2 className='mb-2 text-lg font-semibold text-blue-800'>
                               <Link to={`/journals/${journal.id}`}>
-                                {journal.journal_title ? journal.journal_title : "journal title unspecified"}
+                                {journal.journal_title
+                                  ? journal.journal_title
+                                  : 'journal title unspecified'}
                               </Link>
                             </h2>
                             <p className='mb-2 text-sm text-gray-600'>
-                              {journal.publishers_name ? journal.publishers_name : "publisher unspecified"}
+                              {journal.publishers_name
+                                ? journal.publishers_name
+                                : 'publisher unspecified'}
                             </p>
                             <p className='mb-2 text-sm text-green-800'>
-                              {journal.thematic_area ? journal.thematic_area.thematic_area : "thematic area not specified"}
+                              {journal.thematic_area
+                                ? journal.thematic_area.thematic_area
+                                : 'thematic area not specified'}
                             </p>
                             <p className='mb-2 text-sm text-orange-800'>
-                              {journal.country ? journal.country.country : "country unspecified"}
+                              {journal.country
+                                ? journal.country.country
+                                : 'country unspecified'}
                             </p>
                             <p className='mb-2 text-sm'>
                               {journal.summary
                                 ? journal.summary.length > 500
                                   ? `${journal.summary.substring(0, 500)}...`
                                   : journal.summary
-                                : "No summary specified"}
+                                : 'No summary specified'}
                             </p>
-                            {journal.summary && journal.summary.length > 500 && (
-                              <Link to={`/journals/${journal.id}`}>
-                                <button type="button" className="py-2.5 px-5 me-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">
-                                  Read the Journal
-                                </button>
-                              </Link>
-                            )}
+                            {journal.summary &&
+                              journal.summary.length > 500 && (
+                                <Link to={`/journals/${journal.id}`}>
+                                  <button
+                                    type='button'
+                                    className='mb-2 me-2 rounded-lg border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:outline-none focus:ring-4 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white dark:focus:ring-gray-700'
+                                  >
+                                    Read the Journal
+                                  </button>
+                                </Link>
+                              )}
                           </CardContent>
                         </Card>
                       ))}
