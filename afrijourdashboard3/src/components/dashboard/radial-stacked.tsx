@@ -1,4 +1,4 @@
-import { ResponsiveContainer, RadialBarChart, RadialBar, Legend } from "recharts";
+import { ResponsiveContainer, RadialBarChart, RadialBar } from "recharts";
 
 interface RadialStackedProps {
   percentage: number;
