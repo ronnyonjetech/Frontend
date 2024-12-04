@@ -6,6 +6,7 @@ import { Hero } from '@/components/home/Hero';
 import { SearchSection } from '@/components/home/SearchSection';
 import { JournalResults } from '@/components/home/JournalResults';
 import { WelcomePopup } from '@/components/home/WelcomePopup';
+// import { useLocation } from 'react-router-dom';
 
 export default function Home() {
   const [showPopup, setShowPopup] = useState(true);
@@ -43,8 +44,8 @@ export default function Home() {
 
   const generateUrl = () => {
     const baseUrl = 'https://aphrc.site/journal_api/journals/search/';
-    const params = new URLSearchParams();
-
+    const params = new URLSearchParams(location.search);
+    
     Object.entries(filters)
       .filter(([_, value]) => value !== null)
       .forEach(([key, value]) => {
@@ -64,6 +65,7 @@ export default function Home() {
     setLoading(true);
     try {
       const url = generateUrl();
+      console.log("url",url)
       const response = await fetch(url);
       const data = await response.json();
       setJournals(data.results);
@@ -78,7 +80,7 @@ export default function Home() {
 
   useEffect(() => {
     fetchJournals();
-  }, [currentPage, searchQuery, filters]);
+  }, [currentPage, searchQuery, filters,location.search]);
 
   return (
     <Layout>

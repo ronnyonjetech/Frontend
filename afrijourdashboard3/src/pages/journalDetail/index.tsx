@@ -8,13 +8,24 @@ import { JournalMetrics } from '@/components/JournalMetrics';
 import { JournalMetadata } from '@/components/JournalMetadata';
 import { VolumeList } from '@/components/VolumeList';
 
+
+interface Article {
+  id: number
+  title: string
+  authors: string
+  pdf: string
+  url: string
+  doi: string
+  electronic_issn: string
+}
+
 interface Volume {
-  id: number;
   title: string;
+  id: number;
   volume_number: number;
   issue_number: number;
   year: number;
-  articles: any[];
+  articles: Article[];
 }
 
 interface Image {

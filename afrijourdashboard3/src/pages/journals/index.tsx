@@ -1,6 +1,6 @@
-import { Layout } from '@/components/custom/layout';
-import { Input } from '@/components/ui/input';
-import { IconSearch, IconFilter, IconRefresh } from '@tabler/icons-react';
+import { Layout } from '@/components/custom/layout'
+import { Input } from '@/components/ui/input'
+import { IconSearch, IconFilter, IconRefresh,IconX } from '@tabler/icons-react'
 import {
   Pagination,
   PaginationContent,
@@ -9,184 +9,391 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from '@/components/ui/pagination';
-import { useState, useEffect } from 'react';
-import { ArticleCard } from '@/components/articles/ArticleCard';
-import { FilterPanel } from '@/components/filters/FilterPanel';
-
+} from '@/components/ui/pagination'
+import { useState, useEffect } from 'react'
+import { ArticleCard } from '@/components/articles/ArticleCard'
+// import { FilterPanel } from '@/components/filters/FilterPanel';
+import {  Loader2 } from 'lucide-react'
 interface Article {
-  title: string;
-  authors: string;
-  citation_count: number;
-  url: string;
-  abstract: string;
+  title: string
+  authors: string
+  citation_count: number
+  url: string
+  abstract: string
 }
 
 interface Country {
-  id: number;
-  country: string;
+  id: number
+  country: string
 }
 
 interface ThematicArea {
-  id: number;
-  thematic_area: string;
+  id: number
+  thematic_area: string
 }
 
 interface Language {
-  id: number;
-  language: string;
+  id: number
+  language: string
 }
 
 export default function Journals() {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [articles, setArticles] = useState<Article[]>([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [showFilterForm, setShowFilterForm] = useState(false);
-  const pageSize = 10;
+  const [searchTerm, setSearchTerm] = useState('')
+  const [articles, setArticles] = useState<Article[]>([])
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(0)
+  const [showFilterForm, setShowFilterForm] = useState(false)
+  const pageSize = 10
 
-  const [countries, setCountries] = useState<Country[]>([]);
-  const [thematicAreas, setThematicAreas] = useState<ThematicArea[]>([]);
-  const [languages, setLanguages] = useState<Language[]>([]);
+  const [countries, setCountries] = useState<Country[]>([])
+  const [thematicAreas, setThematicAreas] = useState<ThematicArea[]>([])
+  const [languages, setLanguages] = useState<Language[]>([])
 
-  const [selectedCountries, setSelectedCountries] = useState<number[]>([]);
-  const [selectedThematicAreas, setSelectedThematicAreas] = useState<number[]>([]);
-  const [selectedLanguages, setSelectedLanguages] = useState<number[]>([]);
+  const [selectedCountries, setSelectedCountries] = useState<number[]>([])
+  const [selectedThematicAreas, setSelectedThematicAreas] = useState<number[]>(
+    []
+  )
+  const [selectedLanguages, setSelectedLanguages] = useState<number[]>([])
 
-  const fetchArticles = async (page = 1) => {
+  const [viewMoreCountries, setViewMoreCountries] = useState(false)
+  const [viewMoreThematicAreas, setViewMoreThematicAreas] = useState(false)
+  const [viewMorelanguages, setViewMoreLanguages] = useState(false)
+  const [filteredQuery, setFilteredQuery] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+
+  
+  
+
+  const fetchArticles = async (page = 1, customUrl?: string) => {
+    setIsLoading(true); // Start loading
     try {
-      const response = await fetch(
-        `https://aphrc.site/journal_api/articles/search/?query=${searchTerm}&page=${page}&page_size=${pageSize}`
-      );
+      const url =
+        customUrl ||
+        `https://aphrc.site/journal_api/articles/search/?query=${searchTerm}&page=${page}&page_size=${pageSize}`;
+  
+      console.log('Fetching articles from URL:', url); // Log the URL being requested
+  
+      const response = await fetch(url);
+  
+      // Check if response is OK (status 200-299)
+      if (!response.ok) {
+        throw new Error(`Failed to fetch articles: ${response.statusText}`);
+      }
+  
       const data = await response.json();
-      setArticles(
-        data.results.map((article: any) => ({
-          ...article,
-          abstract:
-            article.abstract ||
-            'Abstract not available. This is a placeholder text that would normally contain 2-3 sentences describing the main points of the research article.',
-        }))
-      );
-      setTotalPages(Math.ceil(data.count / pageSize));
+  
+      // Ensure data has expected structure
+      if (data && data.results) {
+        setArticles(
+          data.results.map((article: any) => ({
+            ...article,
+            abstract:
+              article.abstract ||
+              'Abstract not available. This is a placeholder text that would normally contain 2-3 sentences describing the main points of the research article.',
+          }))
+        );
+        setTotalPages(Math.ceil(data.count / pageSize));
+      } else {
+        throw new Error('Invalid data structure received from API');
+      }
     } catch (error) {
       console.error('Error fetching articles:', error);
+    } finally {
+      setIsLoading(false); // Stop loading
     }
   };
-
+  
   const fetchFiltersData = async () => {
     try {
       const [countriesRes, thematicRes, languagesRes] = await Promise.all([
         fetch('https://aphrc.site/journal_api/api/country/'),
         fetch('https://aphrc.site/journal_api/api/thematic/'),
         fetch('https://aphrc.site/journal_api/api/languages/'),
-      ]);
+      ])
 
-      setCountries(await countriesRes.json());
-      setThematicAreas(await thematicRes.json());
-      setLanguages(await languagesRes.json());
+      setCountries(await countriesRes.json())
+      setThematicAreas(await thematicRes.json())
+      setLanguages(await languagesRes.json())
     } catch (error) {
-      console.error('Error fetching filter data:', error);
+      console.error('Error fetching filter data:', error)
     }
-  };
+  }
+
+  // useEffect(() => {
+  //   fetchFiltersData()
+  //   fetchArticles(currentPage)
+    
+  // }, [searchTerm, currentPage])
 
   useEffect(() => {
-    fetchFiltersData();
-    fetchArticles(currentPage);
-  }, [searchTerm, currentPage]);
+    const loadFiltersAndArticles = async () => {
+      // Fetch filters data and then fetch articles
+      await fetchFiltersData(); // Ensure filters are fetched first
+    
+    };
+    
+    loadFiltersAndArticles();
+  }, [searchTerm, currentPage]); // Trigger whenever searchTerm or currentPage changes
+ 
+ useEffect(()=>{
+fetchArticles(1)
+ },[])
 
   const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-    fetchArticles(page);
-  };
+    setCurrentPage(page)
+
+    const url = filteredQuery
+      ? `https://aphrc.site/journal_api/articles/search/?query=${filteredQuery}&page=${page}&page_size=${pageSize}`
+      : `https://aphrc.site/journal_api/articles/search/?query=${searchTerm}&page=${page}&page_size=${pageSize}`
+
+    fetchArticles(page, url)
+  }
 
   const handleCountryChange = (id: number) => {
     setSelectedCountries((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
-    );
-  };
+    )
+  }
 
   const handleThematicAreaChange = (id: number) => {
     setSelectedThematicAreas((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
-    );
-  };
+    )
+  }
 
   const handleLanguageChange = (id: number) => {
     setSelectedLanguages((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
-    );
-  };
+    )
+  }
 
-  const handleApplyFilter = () => {
-    fetchArticles(1);
-    setShowFilterForm(false);
-  };
+  
+  const handleApplyFilters = () => {
+    const queryParams = []
+
+    if (selectedCountries.length > 0) {
+      const countriesQuery = countries
+        .filter((country) => selectedCountries.includes(country.id))
+        .map((country) => country.country)
+        .join(' ')
+      queryParams.push(countriesQuery)
+    }
+
+    if (selectedThematicAreas.length > 0) {
+      const thematicQuery = thematicAreas
+        .filter((area) => selectedThematicAreas.includes(area.id))
+        .map((area) => area.thematic_area)
+        .join(' ')
+      queryParams.push(thematicQuery)
+    }
+
+    if (selectedLanguages.length > 0) {
+      const languagesQuery = languages
+        .filter((lang) => selectedLanguages.includes(lang.id))
+        .map((lang) => lang.language)
+        .join(' ')
+      queryParams.push(languagesQuery)
+    }
+
+    const dynamicQuery = encodeURIComponent(queryParams.join(' '))
+    setFilteredQuery(dynamicQuery)
+    setShowFilterForm(false)
+
+    const dynamicUrl = `https://aphrc.site/journal_api/articles/search/?query=${dynamicQuery}`
+    fetchArticles(1, dynamicUrl) // Pass the dynamic URL for the first page
+  }
+
+  
 
   return (
     <Layout>
       <Layout.Body>
-        <div className="p-4 md:p-6">
-          <div className="mb-4 flex items-center justify-between ">
-            <div className="relative w-full ">
+        <div className='p-4 md:p-6'>
+          <div className='mb-4 flex items-center justify-between '>
+            <div className='relative w-full '>
               <Input
-                type="search"
-                placeholder="Search..."
+                type='search'
+                placeholder='Search...'
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="block w-full rounded-lg border border-mutedpy-2 pl-10 pr-4 text-sm text-foreground focus:border-primary focus:ring-primary bg-white"
+                className='border-mutedpy-2 block w-full rounded-lg border bg-white pl-10 pr-4 text-sm text-foreground focus:border-primary focus:ring-primary'
               />
-              <div className="absolute inset-y-0 right-0 flex items-center space-x-3 pr-3">
+              <div className='absolute inset-y-0 right-0 flex items-center space-x-3 pr-3'>
                 <IconRefresh
-                  className="h-5 w-5 cursor-pointer text-muted-foreground hover:text-primary"
+                  className='h-5 w-5 cursor-pointer text-muted-foreground hover:text-primary'
                   onClick={() => fetchArticles(currentPage)}
                 />
                 <IconFilter
-                  className="h-5 w-5 cursor-pointer text-muted-foreground hover:text-primary"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setShowFilterForm((prev) => !prev);
-                  }}
+                  className='h-5 w-5 cursor-pointer text-muted-foreground hover:text-primary'
+                  // onClick={(e) => {
+                  //   e.stopPropagation();
+                  //   setShowFilterForm((prev) => !prev);
+                  // }}
+                  onClick={() => setShowFilterForm((prev) => !prev)}
                 />
                 <IconSearch
-                  className="h-5 w-5 cursor-pointer text-muted-foreground hover:text-primary"
+                  className='h-5 w-5 cursor-pointer text-muted-foreground hover:text-primary'
                   onClick={() => fetchArticles(1)}
                 />
               </div>
             </div>
           </div>
 
+          
+
           {showFilterForm && (
-            <FilterPanel
-              showFilterForm={showFilterForm}
-              toggleFilterForm={() => setShowFilterForm(false)}
-              countries={countries}
-              thematicAreas={thematicAreas}
-              languages={languages}
-              selectedCountries={selectedCountries.map(String)}
-              selectedThematicAreas={selectedThematicAreas.map(String)}
-              selectedLanguages={selectedLanguages.map(String)}
-              onCountryChange={(value) => handleCountryChange(Number(value))}
-              onThematicAreaChange={(value) => handleThematicAreaChange(Number(value))}
-              onLanguageChange={(value) => handleLanguageChange(Number(value))}
-              onApplyFilter={handleApplyFilter}
-            />
+            <div className='w-70 max-w-70 fixed left-0 top-0 z-50 h-full overflow-auto bg-white p-4 shadow-lg'>
+              <h3 className='mb-4 text-lg font-bold'>Article Filters</h3>
+               {/* Close icon */}
+      <IconX
+        className='absolute top-4 right-4 cursor-pointer text-muted-foreground hover:text-primary'
+        onClick={() => setShowFilterForm(false)} // Close the form on click
+      />
+
+              <div className='mb-6 w-full'>
+                <h4 className='mb-2 font-semibold'>Countries</h4>
+                <div className='w-full'>
+                  {countries
+                    .slice(0, viewMoreCountries ? countries.length : 5)
+                    .map((country) => (
+                      <div
+                        key={country.id}
+                        className='mb-2 flex w-full items-center'
+                      >
+                        <input
+                          type='checkbox'
+                          id={`country-${country.id}`}
+                          className='mr-2'
+                          checked={selectedCountries.includes(country.id)}
+                          onChange={() => handleCountryChange(country.id)} // Handles checkbox toggle
+                        />
+                        <label
+                          htmlFor={`country-${country.id}`}
+                          className='w-full truncate'
+                        >
+                          {country.country}
+                        </label>
+                      </div>
+                    ))}
+                </div>
+                <button
+                  className='mt-2 text-primary'
+                  onClick={(e) => {
+                    e.preventDefault()
+                    setViewMoreCountries((prev) => !prev)
+                  }}
+                >
+                  {viewMoreCountries ? 'View Less' : 'View More'}
+                </button>
+              </div>
+
+              <div className='mb-6 w-full'>
+                <h4 className='mb-2 font-semibold'>Thematic Areas</h4>
+                <div className='w-full'>
+                  {thematicAreas
+                    .slice(0, viewMoreThematicAreas ? thematicAreas.length : 5)
+                    .map((area) => (
+                      <div
+                        key={area.id}
+                        className='mb-2 flex w-full items-center'
+                      >
+                        <input
+                          type='checkbox'
+                          id={`thematic-${area.id}`}
+                          className='mr-2'
+                          checked={selectedThematicAreas.includes(area.id)}
+                          onChange={() => handleThematicAreaChange(area.id)} // Handles checkbox toggle
+                        />
+                        <label
+                          htmlFor={`thematic-${area.id}`}
+                          className='w-full truncate'
+                        >
+                          {area.thematic_area}
+                        </label>
+                      </div>
+                    ))}
+                </div>
+                <button
+                  className='mt-2 text-primary'
+                  onClick={(e) => {
+                    e.preventDefault()
+                    setViewMoreThematicAreas((prev) => !prev)
+                  }}
+                >
+                  {viewMoreThematicAreas ? 'View Less' : 'View More'}
+                </button>
+              </div>
+
+              <div className='mb-6 w-full'>
+                <h4 className='mb-2 font-semibold'>Languages</h4>
+                <div className='w-full'>
+                  {languages
+                    .slice(0, viewMorelanguages ? languages.length : 5)
+                    .map((language) => (
+                      <div
+                        key={language.id}
+                        className='mb-2 flex w-full items-center'
+                      >
+                        <input
+                          type='checkbox'
+                          id={`language-${language.id}`}
+                          className='mr-2'
+                          checked={selectedLanguages.includes(language.id)}
+                          onChange={() => handleLanguageChange(language.id)} // Handles checkbox toggle
+                        />
+                        <label
+                          htmlFor={`language-${language.id}`}
+                          className='w-70 truncate'
+                        >
+                          {language.language}
+                        </label>
+                      </div>
+                    ))}
+                </div>
+                <button
+                  className='mt-2 text-primary'
+                  onClick={(e) => {
+                    e.preventDefault()
+                    setViewMoreLanguages((prev) => !prev)
+                  }}
+                >
+                  {viewMorelanguages ? 'View Less' : 'View More'}
+                </button>
+              </div>
+
+              <button
+                className='mt-6 w-full rounded-lg bg-primary py-2 text-white'
+                onClick={handleApplyFilters} // Call the dynamic URL builder and fetcher
+              >
+                Apply Filters
+              </button>
+            </div>
           )}
 
-          <div className="space-y-6">
-            {articles.map((article, index) => (
-              <ArticleCard key={index} article={article} />
-            ))}
-          </div>
-
-          <div className="mt-6 ">
+          {isLoading ? (
+            <div className='text-center'>
+              
+              <div className='flex h-40 items-center justify-center'>
+                <Loader2 className='h-8 w-8 animate-spin text-primary' />
+              </div>
+            </div>
+          ) : (
+            <>
+            <div className='space-y-6'>
+              {articles.map((article, index) => (
+                <ArticleCard key={index} article={article} />
+              ))}
+            </div>
+          
+          <div className='mt-6 '>
             <Pagination>
               <PaginationContent>
                 <PaginationItem>
                   <PaginationPrevious
-                    href="#"
+                    href='#'
                     onClick={(e) => {
-                      e.preventDefault();
-                      if (currentPage > 1) handlePageChange(currentPage - 1);
+                      e.preventDefault()
+                      if (currentPage > 1) handlePageChange(currentPage - 1)
                     }}
                     aria-disabled={currentPage <= 1}
                   />
@@ -195,11 +402,11 @@ export default function Journals() {
                   <>
                     <PaginationItem>
                       <PaginationLink
-                        href="#"
+                        href='#'
                         isActive={currentPage === 1}
                         onClick={(e) => {
-                          e.preventDefault();
-                          handlePageChange(1);
+                          e.preventDefault()
+                          handlePageChange(1)
                         }}
                       >
                         1
@@ -219,11 +426,11 @@ export default function Journals() {
                   .map((page) => (
                     <PaginationItem key={page}>
                       <PaginationLink
-                        href="#"
+                        href='#'
                         isActive={currentPage === page}
                         onClick={(e) => {
-                          e.preventDefault();
-                          handlePageChange(page);
+                          e.preventDefault()
+                          handlePageChange(page)
                         }}
                       >
                         {page}
@@ -235,11 +442,11 @@ export default function Journals() {
                     <PaginationEllipsis />
                     <PaginationItem>
                       <PaginationLink
-                        href="#"
+                        href='#'
                         isActive={currentPage === totalPages}
                         onClick={(e) => {
-                          e.preventDefault();
-                          handlePageChange(totalPages);
+                          e.preventDefault()
+                          handlePageChange(totalPages)
                         }}
                       >
                         {totalPages}
@@ -248,11 +455,20 @@ export default function Journals() {
                   </>
                 )}
                 <PaginationItem>
-                  <PaginationNext
+                  {/* <PaginationNext
                     href="#"
                     onClick={(e) => {
                       e.preventDefault();
                       if (currentPage < totalPages) handlePageChange(currentPage + 1);
+                    }}
+                    aria-disabled={currentPage >= totalPages}
+                  /> */}
+                  <PaginationNext
+                    href='#'
+                    onClick={(e) => {
+                      e.preventDefault()
+                      if (currentPage < totalPages)
+                        handlePageChange(currentPage + 1)
                     }}
                     aria-disabled={currentPage >= totalPages}
                   />
@@ -260,8 +476,9 @@ export default function Journals() {
               </PaginationContent>
             </Pagination>
           </div>
+          </>)}
         </div>
       </Layout.Body>
     </Layout>
-  );
+  )
 }
