@@ -1,6 +1,6 @@
 import { Layout } from '@/components/custom/layout'
 import { Input } from '@/components/ui/input'
-import { IconSearch, IconFilter, IconRefresh,IconX } from '@tabler/icons-react'
+import { IconSearch, IconFilter, IconRefresh, IconX } from '@tabler/icons-react'
 import {
   Pagination,
   PaginationContent,
@@ -13,7 +13,8 @@ import {
 import { useState, useEffect } from 'react'
 import { ArticleCard } from '@/components/articles/ArticleCard'
 // import { FilterPanel } from '@/components/filters/FilterPanel';
-import {  Loader2 } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
+import NotFoundPage from './components/NotFoundPage'
 interface Article {
   title: string
   authors: string
@@ -61,27 +62,24 @@ export default function Journals() {
   const [filteredQuery, setFilteredQuery] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
-  
-  
-
   const fetchArticles = async (page = 1, customUrl?: string) => {
-    setIsLoading(true); // Start loading
+    setIsLoading(true) // Start loading
     try {
       const url =
         customUrl ||
-        `https://aphrc.site/journal_api/articles/search/?query=${searchTerm}&page=${page}&page_size=${pageSize}`;
-  
-      console.log('Fetching articles from URL:', url); // Log the URL being requested
-  
-      const response = await fetch(url);
-  
+        `https://aphrc.site/journal_api/articles/search/?query=${searchTerm}&page=${page}&page_size=${pageSize}`
+
+      console.log('Fetching articles from URL:', url) // Log the URL being requested
+
+      const response = await fetch(url)
+
       // Check if response is OK (status 200-299)
       if (!response.ok) {
-        throw new Error(`Failed to fetch articles: ${response.statusText}`);
+        throw new Error(`Failed to fetch articles: ${response.statusText}`)
       }
-  
-      const data = await response.json();
-  
+
+      const data = await response.json()
+
       // Ensure data has expected structure
       if (data && data.results) {
         setArticles(
@@ -91,18 +89,18 @@ export default function Journals() {
               article.abstract ||
               'Abstract not available. This is a placeholder text that would normally contain 2-3 sentences describing the main points of the research article.',
           }))
-        );
-        setTotalPages(Math.ceil(data.count / pageSize));
+        )
+        setTotalPages(Math.ceil(data.count / pageSize))
       } else {
-        throw new Error('Invalid data structure received from API');
+        throw new Error('Invalid data structure received from API')
       }
     } catch (error) {
-      console.error('Error fetching articles:', error);
+      console.error('Error fetching articles:', error)
     } finally {
-      setIsLoading(false); // Stop loading
+      setIsLoading(false) // Stop loading
     }
-  };
-  
+  }
+
   const fetchFiltersData = async () => {
     try {
       const [countriesRes, thematicRes, languagesRes] = await Promise.all([
@@ -119,25 +117,18 @@ export default function Journals() {
     }
   }
 
-  // useEffect(() => {
-  //   fetchFiltersData()
-  //   fetchArticles(currentPage)
-    
-  // }, [searchTerm, currentPage])
-
   useEffect(() => {
     const loadFiltersAndArticles = async () => {
       // Fetch filters data and then fetch articles
-      await fetchFiltersData(); // Ensure filters are fetched first
-    
-    };
-    
-    loadFiltersAndArticles();
-  }, [searchTerm, currentPage]); // Trigger whenever searchTerm or currentPage changes
- 
- useEffect(()=>{
-fetchArticles(1)
- },[])
+      await fetchFiltersData() // Ensure filters are fetched first
+    }
+
+    loadFiltersAndArticles()
+  }, [searchTerm, currentPage]) // Trigger whenever searchTerm or currentPage changes
+
+  useEffect(() => {
+    fetchArticles(1)
+  }, [])
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page)
@@ -167,7 +158,6 @@ fetchArticles(1)
     )
   }
 
-  
   const handleApplyFilters = () => {
     const queryParams = []
 
@@ -203,8 +193,6 @@ fetchArticles(1)
     fetchArticles(1, dynamicUrl) // Pass the dynamic URL for the first page
   }
 
-  
-
   return (
     <Layout>
       <Layout.Body>
@@ -239,16 +227,14 @@ fetchArticles(1)
             </div>
           </div>
 
-          
-
           {showFilterForm && (
-            <div className='w-70 max-w-70 fixed left-0 top-0 z-50 h-full overflow-auto bg-white p-4 shadow-lg'>
+            <div className='w-70 max-w-70 box-sizing: border-box fixed left-0 top-0 z-50 h-full overflow-x-auto overflow-y-auto bg-white p-4 shadow-lg'>
               <h3 className='mb-4 text-lg font-bold'>Article Filters</h3>
-               {/* Close icon */}
-      <IconX
-        className='absolute top-4 right-4 cursor-pointer text-muted-foreground hover:text-primary'
-        onClick={() => setShowFilterForm(false)} // Close the form on click
-      />
+
+              <IconX
+                className='absolute right-4 top-4 cursor-pointer text-muted-foreground hover:text-primary'
+                onClick={() => setShowFilterForm(false)} // Close the form on click
+              />
 
               <div className='mb-6 w-full'>
                 <h4 className='mb-2 font-semibold'>Countries</h4>
@@ -269,7 +255,7 @@ fetchArticles(1)
                         />
                         <label
                           htmlFor={`country-${country.id}`}
-                          className='w-full truncate'
+                          className='w-56 break-words'
                         >
                           {country.country}
                         </label>
@@ -306,7 +292,7 @@ fetchArticles(1)
                         />
                         <label
                           htmlFor={`thematic-${area.id}`}
-                          className='w-full truncate'
+                          className='w-56 break-words'
                         >
                           {area.thematic_area}
                         </label>
@@ -343,7 +329,7 @@ fetchArticles(1)
                         />
                         <label
                           htmlFor={`language-${language.id}`}
-                          className='w-70 truncate'
+                          className='w-56 break-words'
                         >
                           {language.language}
                         </label>
@@ -360,7 +346,7 @@ fetchArticles(1)
                   {viewMorelanguages ? 'View Less' : 'View More'}
                 </button>
               </div>
-
+              {/* bg-[#BFEFFF] */}
               <button
                 className='mt-6 w-full rounded-lg bg-primary py-2 text-white'
                 onClick={handleApplyFilters} // Call the dynamic URL builder and fetcher
@@ -372,111 +358,112 @@ fetchArticles(1)
 
           {isLoading ? (
             <div className='text-center'>
-              
               <div className='flex h-40 items-center justify-center'>
                 <Loader2 className='h-8 w-8 animate-spin text-primary' />
               </div>
             </div>
           ) : (
             <>
-            <div className='space-y-6'>
-              {articles.map((article, index) => (
-                <ArticleCard key={index} article={article} />
-              ))}
-            </div>
-          
-          <div className='mt-6 '>
-            <Pagination>
-              <PaginationContent>
-                <PaginationItem>
-                  <PaginationPrevious
-                    href='#'
-                    onClick={(e) => {
-                      e.preventDefault()
-                      if (currentPage > 1) handlePageChange(currentPage - 1)
-                    }}
-                    aria-disabled={currentPage <= 1}
-                  />
-                </PaginationItem>
-                {currentPage > 3 && (
-                  <>
-                    <PaginationItem>
-                      <PaginationLink
-                        href='#'
-                        isActive={currentPage === 1}
-                        onClick={(e) => {
-                          e.preventDefault()
-                          handlePageChange(1)
-                        }}
-                      >
-                        1
-                      </PaginationLink>
-                    </PaginationItem>
-                    <PaginationEllipsis />
-                  </>
+              <div className='space-y-6'>
+                {articles.length > 0 ? (
+                  articles.map((article, index) => (
+                    <ArticleCard key={index} article={article} />
+                  ))
+                ) : (
+                  <div className=' flex  items-center justify-center'>
+                    <NotFoundPage />
+                  </div>
                 )}
-                {[...Array(totalPages)]
-                  .map((_, index) => index + 1)
-                  .filter(
-                    (page) =>
-                      page === 1 ||
-                      page === totalPages ||
-                      (page >= currentPage - 2 && page <= currentPage + 2)
-                  )
-                  .map((page) => (
-                    <PaginationItem key={page}>
-                      <PaginationLink
-                        href='#'
-                        isActive={currentPage === page}
-                        onClick={(e) => {
-                          e.preventDefault()
-                          handlePageChange(page)
-                        }}
-                      >
-                        {page}
-                      </PaginationLink>
-                    </PaginationItem>
-                  ))}
-                {currentPage < totalPages - 2 && (
-                  <>
-                    <PaginationEllipsis />
-                    <PaginationItem>
-                      <PaginationLink
-                        href='#'
-                        isActive={currentPage === totalPages}
-                        onClick={(e) => {
-                          e.preventDefault()
-                          handlePageChange(totalPages)
-                        }}
-                      >
-                        {totalPages}
-                      </PaginationLink>
-                    </PaginationItem>
-                  </>
-                )}
-                <PaginationItem>
-                  {/* <PaginationNext
-                    href="#"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      if (currentPage < totalPages) handlePageChange(currentPage + 1);
-                    }}
-                    aria-disabled={currentPage >= totalPages}
-                  /> */}
-                  <PaginationNext
-                    href='#'
-                    onClick={(e) => {
-                      e.preventDefault()
-                      if (currentPage < totalPages)
-                        handlePageChange(currentPage + 1)
-                    }}
-                    aria-disabled={currentPage >= totalPages}
-                  />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
-          </div>
-          </>)}
+              </div>
+
+              {articles.length > 0 && (
+                <div className='mt-6'>
+                  <Pagination>
+                    <PaginationContent>
+                      <PaginationItem>
+                        <PaginationPrevious
+                          href='#'
+                          onClick={(e) => {
+                            e.preventDefault()
+                            if (currentPage > 1)
+                              handlePageChange(currentPage - 1)
+                          }}
+                          aria-disabled={currentPage <= 1}
+                        />
+                      </PaginationItem>
+                      {currentPage > 3 && (
+                        <>
+                          <PaginationItem>
+                            <PaginationLink
+                              href='#'
+                              isActive={currentPage === 1}
+                              onClick={(e) => {
+                                e.preventDefault()
+                                handlePageChange(1)
+                              }}
+                            >
+                              1
+                            </PaginationLink>
+                          </PaginationItem>
+                          <PaginationEllipsis />
+                        </>
+                      )}
+                      {[...Array(totalPages)]
+                        .map((_, index) => index + 1)
+                        .filter(
+                          (page) =>
+                            page === 1 ||
+                            page === totalPages ||
+                            (page >= currentPage - 2 && page <= currentPage + 2)
+                        )
+                        .map((page) => (
+                          <PaginationItem key={page}>
+                            <PaginationLink
+                              href='#'
+                              isActive={currentPage === page}
+                              onClick={(e) => {
+                                e.preventDefault()
+                                handlePageChange(page)
+                              }}
+                            >
+                              {page}
+                            </PaginationLink>
+                          </PaginationItem>
+                        ))}
+                      {currentPage < totalPages - 2 && (
+                        <>
+                          <PaginationEllipsis />
+                          <PaginationItem>
+                            <PaginationLink
+                              href='#'
+                              isActive={currentPage === totalPages}
+                              onClick={(e) => {
+                                e.preventDefault()
+                                handlePageChange(totalPages)
+                              }}
+                            >
+                              {totalPages}
+                            </PaginationLink>
+                          </PaginationItem>
+                        </>
+                      )}
+                      <PaginationItem>
+                        <PaginationNext
+                          href='#'
+                          onClick={(e) => {
+                            e.preventDefault()
+                            if (currentPage < totalPages)
+                              handlePageChange(currentPage + 1)
+                          }}
+                          aria-disabled={currentPage >= totalPages}
+                        />
+                      </PaginationItem>
+                    </PaginationContent>
+                  </Pagination>
+                </div>
+              )}
+            </>
+          )}
         </div>
       </Layout.Body>
     </Layout>

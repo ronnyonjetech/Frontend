@@ -13,7 +13,7 @@ interface ArticleCardProps {
 
 export const ArticleCard = ({ article }: ArticleCardProps) => {
   return (
-    <div className="mb-6 rounded-lg border border-gray-200 bg-[#AFEEEE] p-6 shadow-sm">
+    <div className="mb-6 rounded-lg border border-gray-200  bg-[#BFEFFF] p-6 shadow-sm">
       <h1 className="mb-3 text-xl font-bold text-gray-900">{article.title}</h1>
       
       <div className="mb-3 flex items-center space-x-1 text-sm text-gray-700">
